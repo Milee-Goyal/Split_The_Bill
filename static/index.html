@@ -3,88 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Bill Splitter - Split the Bill From a Photograph</title>
+  <title>SmartBill - Proportional Receipt Splitter</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Top Navigation Header -->
   <header class="app-header">
     <div class="header-container">
       <div class="brand">
-        <div class="brand-icon">🧾</div>
+        <div class="brand-badge">SB</div>
         <div>
-          <h1 class="brand-title">SmartBill AI</h1>
-          <p class="brand-subtitle">Proportional Fair-Share Splitter from Photographs</p>
+          <h1 class="brand-title">SmartBill Engine</h1>
+          <p class="brand-subtitle">Proportional Fair-Share Expense Allocation</p>
         </div>
       </div>
-      <div class="header-badges">
-        <span class="badge badge-light-blue">📷 Multimodal OCR</span>
-        <span class="badge badge-light-purple">⚖️ Proportional Math</span>
-        <span class="badge badge-light-green">🎯 12 Test Cases Ready</span>
-      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab-btn active" id="tab-btn-splitter" onclick="switchView('splitter')">Bill Splitter</button>
+        <button class="nav-tab-btn" id="tab-btn-benchmark" onclick="switchView('benchmark')">Benchmark Suite (12 Bills)</button>
+        <button class="nav-tab-btn" id="tab-btn-algorithm" onclick="switchView('algorithm')">Algorithm Details</button>
+      </nav>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="main-container">
+  <!-- VIEW 1: BILL SPLITTER (MAIN WORKFLOW) -->
+  <main class="main-container" id="view-splitter">
     <!-- Stepper Navigation -->
     <nav class="stepper">
       <button class="step-btn active" id="step-btn-1" onclick="goToStep(1)">
         <span class="step-num">1</span>
-        <span class="step-label">Upload or Pick Bill</span>
+        <span class="step-label">Ingestion</span>
       </button>
       <div class="step-divider"></div>
       <button class="step-btn" id="step-btn-2" onclick="goToStep(2)">
         <span class="step-num">2</span>
-        <span class="step-label">Review & Confidence</span>
+        <span class="step-label">Verification & Confidence</span>
       </button>
       <div class="step-divider"></div>
       <button class="step-btn" id="step-btn-3" onclick="goToStep(3)">
         <span class="step-num">3</span>
-        <span class="step-label">Interactive Member Chips</span>
+        <span class="step-label">Participant Assignment</span>
       </button>
       <div class="step-divider"></div>
       <button class="step-btn" id="step-btn-4" onclick="goToStep(4)">
         <span class="step-num">4</span>
-        <span class="step-label">Fair Breakdown</span>
+        <span class="step-label">Settlement</span>
       </button>
     </nav>
 
-    <!-- STEP 1: UPLOAD / PICK BILL -->
+    <!-- STEP 1: INGESTION -->
     <section id="step-1" class="step-section active">
       <div class="section-intro">
-        <h2>Choose a Bill to Split</h2>
-        <p>Upload any receipt photo from your device, or test instantly using one of the 12 challenging edge-case receipts below.</p>
+        <h2>Receipt Ingestion</h2>
+        <p>Provide a receipt image via file upload or live camera capture to initiate structured OCR extraction.</p>
       </div>
 
-      <!-- Upload Drop Zone -->
+      <!-- Ingestion Card -->
       <div class="upload-card">
         <div class="drop-zone" id="drop-zone">
-          <div class="drop-icon">📸</div>
-          <h3>Upload or Click Receipt Photo</h3>
-          <p>You can upload a receipt file from your device, or use your camera to take a photo directly.</p>
+          <div class="drop-icon-clean">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <h3>Select or Capture Receipt Image</h3>
+          <p>Upload a PNG/JPG document from your local storage, or capture directly using your device camera.</p>
           <input type="file" id="file-input" accept="image/*" style="display: none;">
           <div class="upload-btn-group">
             <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
-              📁 Browse Photo
+              Browse File
             </button>
             <button class="btn btn-secondary" onclick="openCameraModal()">
-              📷 Take Photo with Camera
+              Use Camera
             </button>
           </div>
           <div id="upload-status" class="upload-status"></div>
         </div>
       </div>
 
+      <!-- Helper link to benchmark suite -->
+      <div class="benchmark-callout">
+        <div>
+          <h4>Evaluating System Robustness?</h4>
+          <p>Access the 12 pre-annotated challenging edge-case receipts (faded thermal, handwritten, perspective tilt, cashier arithmetic discrepancy).</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="switchView('benchmark')">Open Benchmark Suite →</button>
+      </div>
+
       <!-- Camera Modal -->
       <div id="camera-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
           <div class="modal-header">
-            <h3>📷 Take Receipt Photo</h3>
-            <button class="btn-close" onclick="closeCameraModal()">×</button>
+            <h3>Camera Capture</h3>
+            <button class="btn-close" onclick="closeCameraModal()">&times;</button>
           </div>
           <div class="camera-body">
             <div class="video-wrapper">
@@ -94,41 +109,27 @@
             <div id="camera-error" class="camera-error" style="display: none;"></div>
           </div>
           <div class="modal-footer">
-            <button id="btn-snap" class="btn btn-primary" onclick="captureSnapshot()">📸 Click Photo</button>
-            <button id="btn-retake" class="btn btn-outline" onclick="retakeSnapshot()" style="display: none;">🔄 Retake</button>
-            <button id="btn-use-photo" class="btn btn-success" onclick="useCapturedPhoto()" style="display: none;">✓ Use This Photo</button>
+            <button id="btn-snap" class="btn btn-primary" onclick="captureSnapshot()">Capture Frame</button>
+            <button id="btn-retake" class="btn btn-outline" onclick="retakeSnapshot()" style="display: none;">Retake</button>
+            <button id="btn-use-photo" class="btn btn-success" onclick="useCapturedPhoto()" style="display: none;">Process Image</button>
             <button class="btn btn-outline" onclick="closeCameraModal()">Cancel</button>
           </div>
         </div>
       </div>
-
-      <!-- 12 Test Cases Gallery -->
-      <div class="gallery-header">
-        <div class="gallery-title-box">
-          <h3>Pre-loaded Test Suite (12 Challenging Conditions)</h3>
-          <p>Click any card to immediately load its image, OCR confidence ratings, and data.</p>
-        </div>
-        <span class="badge badge-accent">Ground Truth Labeled</span>
-      </div>
-
-      <div class="sample-grid" id="sample-grid">
-        <!-- Injected via JavaScript -->
-      </div>
     </section>
 
-    <!-- STEP 2: REVIEW & CONFIDENCE -->
+    <!-- STEP 2: VERIFICATION & CONFIDENCE REVIEW -->
     <section id="step-2" class="step-section">
       <div class="section-intro">
-        <h2>Step 2: Human-in-the-Loop Review</h2>
-        <p>Inspect extracted line items, review per-field OCR confidence, and correct any blurry text before splitting.</p>
+        <h2>Human-in-the-Loop Verification</h2>
+        <p>Inspect extracted line items, review per-field OCR confidence, and resolve any visual ambiguities prior to mathematical allocation.</p>
       </div>
 
-      <!-- Discrepancy Alert Box -->
+      <!-- Discrepancy Banner -->
       <div id="discrepancy-banner" class="alert-banner alert-warning" style="display: none;">
-        <div class="alert-icon">⚠️</div>
         <div class="alert-content">
-          <h4>Printed Arithmetic Error Detected!</h4>
-          <p id="discrepancy-desc">The restaurant's printed receipt total differs from items + tax calculation.</p>
+          <h4>Arithmetic Discrepancy Detected</h4>
+          <p id="discrepancy-desc">The vendor's printed grand total deviates from the calculated sum of line items and taxes.</p>
         </div>
       </div>
 
@@ -136,14 +137,14 @@
         <!-- Receipt Image Preview -->
         <div class="preview-panel card">
           <div class="panel-header">
-            <h3 id="preview-bill-title">Receipt Photo</h3>
-            <span id="condition-badge" class="badge badge-light-blue">Receipt</span>
+            <h3 id="preview-bill-title">Source Receipt</h3>
+            <span id="condition-badge" class="badge badge-light-blue">Standard</span>
           </div>
           <div class="image-container">
-            <img id="bill-img-preview" src="" alt="Receipt Image Preview">
+            <img id="bill-img-preview" src="" alt="Source Receipt Preview">
           </div>
           <div class="image-note">
-            <span id="bill-challenge-text">Original receipt photo captured under test condition.</span>
+            <span id="bill-challenge-text">Original capture preview.</span>
           </div>
         </div>
 
@@ -151,8 +152,8 @@
         <div class="data-panel card">
           <div class="panel-header">
             <div>
-              <h3>Extracted Line Items</h3>
-              <p class="subtitle">Confidence scores: <span class="conf-high">Green $\ge$ 85%</span> | <span class="conf-med">Amber &lt; 85%</span></p>
+              <h3>Extracted Items</h3>
+              <p class="subtitle">Confidence thresholds: <span class="conf-high">High &ge; 85%</span> | <span class="conf-med">Review &lt; 85%</span></p>
             </div>
             <button class="btn btn-secondary btn-sm" onclick="addNewLineItem()">+ Add Item</button>
           </div>
@@ -161,12 +162,12 @@
             <table class="items-table" id="review-items-table">
               <thead>
                 <tr>
-                  <th>Item Name</th>
+                  <th>Description</th>
                   <th style="width: 70px;">Qty</th>
-                  <th style="width: 100px;">Price (₹)</th>
-                  <th style="width: 100px;">Total (₹)</th>
-                  <th style="width: 100px;">Confidence</th>
-                  <th style="width: 40px;"></th>
+                  <th style="width: 95px;">Unit (INR)</th>
+                  <th style="width: 95px;">Total (INR)</th>
+                  <th style="width: 95px;">Confidence</th>
+                  <th style="width: 35px;"></th>
                 </tr>
               </thead>
               <tbody id="review-items-body">
@@ -178,67 +179,74 @@
           <!-- Metadata & Taxes Breakdown -->
           <div class="metadata-grid">
             <div class="meta-field">
-              <label>Subtotal (₹)</label>
+              <label>Subtotal (INR)</label>
               <input type="number" step="0.01" id="meta-subtotal" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field">
-              <label>CGST (₹)</label>
+              <label>CGST (INR)</label>
               <input type="number" step="0.01" id="meta-cgst" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field">
-              <label>SGST (₹)</label>
+              <label>SGST (INR)</label>
               <input type="number" step="0.01" id="meta-sgst" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field">
-              <label>VAT / Liquor (₹)</label>
+              <label>VAT (INR)</label>
               <input type="number" step="0.01" id="meta-vat" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field">
-              <label>Service Charge (₹)</label>
+              <label>Service Charge (INR)</label>
               <input type="number" step="0.01" id="meta-service-charge" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field">
-              <label>Discount (₹)</label>
+              <label>Discount (INR)</label>
               <input type="number" step="0.01" id="meta-discount" onchange="recalculateReviewTotals()">
             </div>
             <div class="meta-field highlight-field">
-              <label>Grand Total (₹)</label>
+              <label>Grand Total (INR)</label>
               <input type="number" step="0.01" id="meta-grand-total">
             </div>
           </div>
 
           <div class="panel-footer">
-            <button class="btn btn-outline" onclick="goToStep(1)">← Back to Bill Selection</button>
-            <button class="btn btn-primary" onclick="proceedToAssignment()">Continue to Member Chips →</button>
+            <button class="btn btn-outline" onclick="goToStep(1)">&larr; Back to Ingestion</button>
+            <button class="btn btn-primary" onclick="proceedToAssignment()">Proceed to Member Assignment &rarr;</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- STEP 3: INTERACTIVE MEMBER ASSIGNMENT (CHIPS) -->
+    <!-- STEP 3: INTERACTIVE MEMBER CHIPS (WAY A) -->
     <section id="step-3" class="step-section">
       <div class="section-intro">
-        <h2>Step 3: Interactive Member Chips (Way A)</h2>
-        <p>Add the friends who ate dinner, then click member chips on each dish to define who ate what. Proportions update instantly.</p>
+        <h2>Participant Assignment</h2>
+        <p>Add the participants who shared this meal. Toggle member chips on each line item to allocate consumption.</p>
       </div>
 
-      <!-- Member Management Bar -->
+      <!-- Member Management Card -->
       <div class="members-card card">
         <div class="members-header">
           <div class="members-title">
-            <h3>Dinner Participants (<span id="member-count">3</span>)</h3>
-            <p>Click a chip to remove, or type a new name and press Enter.</p>
+            <h3>Participants (<span id="member-count">0</span>)</h3>
+            <p>Enter individual names to add to the allocation pool.</p>
           </div>
           <div class="member-input-group">
-            <input type="text" id="new-member-input" placeholder="Enter friend's name (e.g. Rohan)" onkeypress="handleMemberInput(event)">
-            <button class="btn btn-secondary" onclick="addMemberFromInput()">Add Friend</button>
+            <input type="text" id="new-member-input" placeholder="Enter participant name" onkeypress="handleMemberInput(event)">
+            <button class="btn btn-secondary" onclick="addMemberFromInput()">Add Member</button>
           </div>
         </div>
+
         <div class="member-chips-list" id="members-list">
           <!-- Member pills injected via JS -->
         </div>
-        <!-- Live spend summary bar across members -->
-        <div class="live-spend-ticker" id="live-spend-ticker">
+
+        <!-- Empty state message if no members added -->
+        <div id="empty-members-alert" class="empty-state-box">
+          <p>No participants added yet. Enter names above (e.g. Alice, Bob) to enable dish assignment chips.</p>
+        </div>
+
+        <!-- Live spend summary ticker -->
+        <div class="live-spend-ticker" id="live-spend-ticker" style="display: none;">
           <!-- Real-time spending preview injected via JS -->
         </div>
       </div>
@@ -247,8 +255,8 @@
       <div class="assignment-card card">
         <div class="panel-header">
           <div>
-            <h3>Assign Dishes to Members</h3>
-            <p class="subtitle">Click <strong>[Everyone]</strong> to split equally, or select specific member chips.</p>
+            <h3>Item Allocation Matrix</h3>
+            <p class="subtitle">Click <strong>All Members</strong> to split uniformly, or select individual participant chips.</p>
           </div>
           <button class="btn btn-outline btn-sm" onclick="assignAllToEveryone()">Reset: All to Everyone</button>
         </div>
@@ -257,10 +265,10 @@
           <table class="assignment-table">
             <thead>
               <tr>
-                <th style="width: 32%;">Item & Quantity</th>
-                <th style="width: 15%;">Total Price</th>
-                <th style="width: 40%;">Assigned To (Click Chips to Toggle)</th>
-                <th style="width: 13%;">Cost / Person</th>
+                <th style="width: 32%;">Item Description</th>
+                <th style="width: 16%;">Total Price</th>
+                <th style="width: 38%;">Assigned Participants</th>
+                <th style="width: 14%;">Cost / Head</th>
               </tr>
             </thead>
             <tbody id="assignment-table-body">
@@ -270,8 +278,8 @@
         </div>
 
         <div class="panel-footer">
-          <button class="btn btn-outline" onclick="goToStep(2)">← Back to Review</button>
-          <button class="btn btn-primary btn-lg" onclick="computeFinalSplit()">Calculate Proportional Split ✨</button>
+          <button class="btn btn-outline" onclick="goToStep(2)">&larr; Back to Verification</button>
+          <button class="btn btn-primary btn-lg" onclick="computeFinalSplit()">Calculate Proportional Settlement &rarr;</button>
         </div>
       </div>
     </section>
@@ -279,55 +287,117 @@
     <!-- STEP 4: DETAILED BREAKDOWN -->
     <section id="step-4" class="step-section">
       <div class="section-intro">
-        <h2>Step 4: Mathematically Fair Price Breakdown</h2>
-        <p>Taxes, discounts, and service charges are distributed strictly in proportion to what each person ate.</p>
+        <h2>Settlement Breakdown</h2>
+        <p>Taxes, statutory levies, discounts, and service charges allocated in proportion to individual food consumption.</p>
       </div>
 
       <!-- Summary Banner -->
       <div class="summary-hero card">
         <div class="hero-col">
           <span class="hero-label">Bill Grand Total</span>
-          <span class="hero-value" id="res-grand-total">₹0.00</span>
+          <span class="hero-value" id="res-grand-total">INR 0.00</span>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-col">
-          <span class="hero-label">Food Subtotal</span>
-          <span class="hero-value text-muted" id="res-subtotal">₹0.00</span>
+          <span class="hero-label">Net Food Subtotal</span>
+          <span class="hero-value text-muted" id="res-subtotal">INR 0.00</span>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-col">
-          <span class="hero-label">Total Taxes & Fees</span>
-          <span class="hero-value text-muted" id="res-taxes">₹0.00</span>
+          <span class="hero-label">Net Taxes & Charges</span>
+          <span class="hero-value text-muted" id="res-taxes">INR 0.00</span>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-col">
           <span class="hero-label">Balance Status</span>
-          <span class="badge badge-success" id="res-balance-badge">✓ Exact Penny Match</span>
+          <span class="badge badge-success" id="res-balance-badge">Exact Penny Reconciled</span>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="breakdown-actions">
-        <button class="btn btn-secondary" onclick="copyWhatsAppFormat()">📋 Copy Summary for WhatsApp / UPI</button>
-        <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save PDF</button>
-        <button class="btn btn-outline" onclick="goToStep(3)">← Adjust Member Chips</button>
+        <button class="btn btn-secondary" onclick="copyWhatsAppFormat()">Copy Settlement Summary</button>
+        <button class="btn btn-outline" onclick="window.print()">Print / Export PDF</button>
+        <button class="btn btn-outline" onclick="goToStep(3)">&larr; Adjust Member Chips</button>
       </div>
 
       <!-- Member Breakdown Cards Grid -->
       <div class="member-cards-grid" id="member-cards-grid">
         <!-- Injected via JavaScript -->
       </div>
-
-      <!-- Explanation Box -->
-      <div class="info-card card">
-        <h4>💡 Why Proportional Tax Math Matters:</h4>
-        <p>If someone only ordered a ₹60 soda while someone else ate a ₹350 biryani, splitting the ₹40 GST equally is unfair. Our engine allocates tax and service charge according to each person's exact percentage of total food consumed ($S_i / S_{total}$), ensuring everyone pays their fair mathematical share.</p>
-      </div>
     </section>
   </main>
 
+  <!-- VIEW 2: BENCHMARK SUITE (12 TEST CASES) -->
+  <main class="main-container" id="view-benchmark" style="display: none;">
+    <div class="section-intro">
+      <h2>Benchmark Evaluation Suite</h2>
+      <p>12 hand-annotated test receipts specifically designed to evaluate system behavior under challenging real-world edge cases.</p>
+    </div>
+
+    <div class="sample-grid" id="sample-grid">
+      <!-- Injected via JavaScript -->
+    </div>
+  </main>
+
+  <!-- VIEW 3: ALGORITHM & ARCHITECTURE -->
+  <main class="main-container" id="view-algorithm" style="display: none;">
+    <div class="section-intro">
+      <h2>Algorithmic Methodology & System Architecture</h2>
+      <p>Formal mathematical formulation and system pipeline details for proportional expense allocation.</p>
+    </div>
+
+    <div class="algo-card card">
+      <h3>1. Multimodal Extraction & Schema Enforcement</h3>
+      <p>Receipts are ingested via multimodal vision encoders and mapped into strict Pydantic v2 data structures (<code>BillItem</code>, <code>BillTaxes</code>, <code>BillMetadata</code>, <code>ParsedBill</code>). Every field is assigned a confidence metric $c \in [0.0, 1.0]$.</p>
+      <div class="code-box">
+class BillItem(BaseModel):
+    id: str
+    name: str
+    quantity: float
+    unit_price: float
+    total_price: float
+    confidence: float
+      </div>
+    </div>
+
+    <div class="algo-card card">
+      <h3>2. Epistemic Discrepancy Verification</h3>
+      <p>Rather than blindly trusting vendor arithmetic, the parser calculates the expected grand total:</p>
+      <div class="math-box">
+        $$G_{\text{expected}} = S_{\text{food}} + T_{\text{CGST}} + T_{\text{SGST}} + T_{\text{VAT}} + C_{\text{service}} + C_{\text{other}} - D_{\text{discount}}$$
+      </div>
+      <p>If $|G_{\text{printed}} - G_{\text{expected}}| > 1.00$, the receipt is flagged with <code>is_arithmetically_valid = False</code> and displays an alert indicating cashier calculation error.</p>
+    </div>
+
+    <div class="algo-card card">
+      <h3>3. Proportional Fair-Share Allocation</h3>
+      <p>For each participant $m_i$, individual food subtotal $S_i$ is computed from shared dishes:</p>
+      <div class="math-box">
+        $$S_i = \sum_{k \in \text{Items}_i} \frac{P_k}{N_k}$$
+      </div>
+      <p>Where $P_k$ is the line item price and $N_k$ is the count of participants sharing item $k$. The participant's spend ratio is:</p>
+      <div class="math-box">
+        $$r_i = \frac{S_i}{\sum_{j=1}^{M} S_j}$$
+      </div>
+      <p>Taxes and charges are allocated strictly according to $r_i$:</p>
+      <div class="math-box">
+        $$\text{Total Payable}_i = S_i + (T_{\text{total}} \cdot r_i) + (C_{\text{service}} \cdot r_i) - (D_{\text{discount}} \cdot r_i)$$
+      </div>
+    </div>
+
+    <div class="algo-card card">
+      <h3>4. Penny Residual Reconciliation</h3>
+      <p>Due to floating-point truncation to 2 decimal places, rounding error $\delta$ is computed:</p>
+      <div class="math-box">
+        $$\delta = G_{\text{printed}} - \sum_{i=1}^{M} \text{Payable}_i$$
+      </div>
+      <p>The residual $|\delta| \le 0.05$ is reconciled onto the highest-value subtotal ticket, guaranteeing a zero-residual exact penny balance.</p>
+    </div>
+  </main>
+
   <footer class="app-footer">
-    <p>Split the Bill From a Photograph • Placement Round Project • Light Mode Edition</p>
+    <p>SmartBill Engine &bull; Deterministic Proportional Settlement Architecture</p>
   </footer>
 
   <script src="/static/app.js"></script>

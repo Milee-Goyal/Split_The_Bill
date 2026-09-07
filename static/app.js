@@ -1,20 +1,21 @@
 /**
- * Smart Bill Splitter - Client Application Logic
- * Interactive Light Mode UI with Stepper, Human-in-the-Loop Review,
- * Interactive Member Chips (Way A), and Proportional Fair-Share Math.
+ * SmartBill Engine - Client Application Logic
+ * Clean, Engineered Interface (No Emojis), Tab Switching,
+ * Empty Initial Member Pool, Dynamic Chip Allocation, and Fair-Share Settlement.
  */
 
 const STATE = {
+  currentView: "splitter", // 'splitter' | 'benchmark' | 'algorithm'
   currentStep: 1,
   currentBill: null,
-  members: ["Rahul", "Priya", "Amit"],
+  members: [], // Empty by default; user adds participants manually
   assignments: {}, // item_id -> { is_all: bool, assigned_to: Set<string> }
   splitResult: null,
 };
 
 const AVATAR_COLORS = [
-  "#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", 
-  "#ec4899", "#8b5cf6", "#14b8a6", "#f97316"
+  "#4338ca", "#0284c7", "#059669", "#d97706", 
+  "#db2777", "#7c3aed", "#0d9488", "#ea580c"
 ];
 
 function getMemberColor(name) {
@@ -27,17 +28,37 @@ function getMemberColor(name) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadSampleBills();
   setupUploadListeners();
   renderMembersList();
 });
 
 // ==========================================
-// STEPPER NAVIGATION
+// TOP NAVIGATION VIEW SWITCHER
+// ==========================================
+function switchView(viewName) {
+  STATE.currentView = viewName;
+
+  document.getElementById("view-splitter").style.display = viewName === "splitter" ? "block" : "none";
+  document.getElementById("view-benchmark").style.display = viewName === "benchmark" ? "block" : "none";
+  document.getElementById("view-algorithm").style.display = viewName === "algorithm" ? "block" : "none";
+
+  document.getElementById("tab-btn-splitter").classList.toggle("active", viewName === "splitter");
+  document.getElementById("tab-btn-benchmark").classList.toggle("active", viewName === "benchmark");
+  document.getElementById("tab-btn-algorithm").classList.toggle("active", viewName === "algorithm");
+
+  if (viewName === "benchmark") {
+    loadSampleBills();
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ==========================================
+// STEPPER NAVIGATION (SPLITTER WORKFLOW)
 // ==========================================
 function goToStep(step) {
   if (step > 1 && !STATE.currentBill) {
-    alert("Please select a sample bill or upload a receipt photo first.");
+    alert("Please upload a receipt photo or load a benchmark bill first.");
     return;
   }
   STATE.currentStep = step;
@@ -51,73 +72,24 @@ function goToStep(step) {
 }
 
 // ==========================================
-// STEP 1: LOAD SAMPLE BILLS & UPLOAD
+// STEP 1: INGESTION & UPLOAD
 // ==========================================
-async function loadSampleBills() {
-  const grid = document.getElementById("sample-grid");
-  grid.innerHTML = "<p>Loading test suite...</p>";
-
-  try {
-    const res = await fetch("/api/sample-bills");
-    const data = await res.json();
-    grid.innerHTML = "";
-
-    data.bills.forEach((bill) => {
-      const card = document.createElement("div");
-      card.className = "sample-card";
-      card.onclick = () => selectSampleBill(bill.bill_id);
-
-      const isFaulty = !bill.is_arithmetically_valid;
-      const tagClass = isFaulty ? "sample-tag tag-error" : "sample-tag";
-
-      card.innerHTML = `
-        <div class="sample-top">
-          <span class="${tagClass}">${bill.condition_tag}</span>
-          <span style="font-size: 0.75rem; color: #64748b;">${bill.items_count} items</span>
-        </div>
-        <div class="sample-name">${bill.bill_name}</div>
-        <div class="sample-desc">${bill.challenge_description}</div>
-        <div class="sample-footer">
-          <span>Total:</span>
-          <span class="sample-total">₹${bill.grand_total.toFixed(2)}</span>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  } catch (err) {
-    grid.innerHTML = `<p style="color: red;">Failed to load sample bills: ${err.message}</p>`;
-  }
-}
-
-async function selectSampleBill(billId) {
-  try {
-    const res = await fetch(`/api/bills/${billId}`);
-    if (!res.ok) throw new Error("Could not fetch bill data");
-    const bill = await res.json();
-    setLoadedBill(bill);
-    goToStep(2);
-  } catch (err) {
-    alert(`Error loading bill: ${err.message}`);
-  }
-}
-
 function setupUploadListeners() {
   const dropZone = document.getElementById("drop-zone");
   const fileInput = document.getElementById("file-input");
-  const statusBox = document.getElementById("upload-status");
 
   dropZone.addEventListener("dragover", (e) => {
     e.preventDefault();
-    dropZone.style.borderColor = "#4f46e5";
+    dropZone.style.borderColor = "#4338ca";
   });
 
   dropZone.addEventListener("dragleave", () => {
-    dropZone.style.borderColor = "#e2e8f0";
+    dropZone.style.borderColor = "#cbd5e1";
   });
 
   dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
-    dropZone.style.borderColor = "#e2e8f0";
+    dropZone.style.borderColor = "#cbd5e1";
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleReceiptFile(e.dataTransfer.files[0]);
     }
@@ -132,33 +104,45 @@ function setupUploadListeners() {
 
 async function handleReceiptFile(file) {
   const statusBox = document.getElementById("upload-status");
-  statusBox.textContent = `Processing receipt photo "${file.name || 'camera_snap.jpg'}" via OCR...`;
-  statusBox.style.color = "#4f46e5";
+  statusBox.textContent = `Extracting structured items from "${file.name || 'capture.jpg'}"...`;
+  statusBox.style.color = "#4338ca";
 
   const formData = new FormData();
-  formData.append("file", file, file.name || "camera_snap.jpg");
+  formData.append("file", file, file.name || "capture.jpg");
 
   try {
     const res = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
-    if (!res.ok) throw new Error("Extraction failed");
+    if (!res.ok) throw new Error("OCR extraction failed");
     const bill = await res.json();
-    statusBox.textContent = "✓ Extracted successfully! Moving to Review...";
-    statusBox.style.color = "#10b981";
+    statusBox.textContent = "Extraction complete. Navigating to verification...";
+    statusBox.style.color = "#059669";
     setTimeout(() => {
       setLoadedBill(bill);
       goToStep(2);
-    }, 500);
+    }, 450);
   } catch (err) {
-    statusBox.textContent = `Upload error: ${err.message}`;
-    statusBox.style.color = "#ef4444";
+    statusBox.textContent = `Extraction error: ${err.message}`;
+    statusBox.style.color = "#dc2626";
   }
 }
 
+function setLoadedBill(bill) {
+  STATE.currentBill = bill;
+  STATE.assignments = {};
+  bill.items.forEach((item) => {
+    STATE.assignments[item.id] = {
+      is_all: STATE.members.length > 0,
+      assigned_to: new Set(STATE.members),
+    };
+  });
+  populateReviewScreen();
+}
+
 // ==========================================
-// CAMERA CAPTURE (CLICK PHOTO)
+// CAMERA CAPTURE
 // ==========================================
 let cameraStream = null;
 let capturedBlob = null;
@@ -194,7 +178,7 @@ async function openCameraModal() {
       video.srcObject = cameraStream;
     } catch (fallbackErr) {
       errBox.style.display = "block";
-      errBox.textContent = `Camera error: ${fallbackErr.message}. Please allow camera permissions in your browser.`;
+      errBox.textContent = `Camera initialization failed: ${fallbackErr.message}. Ensure camera permissions are granted.`;
       btnSnap.style.display = "none";
     }
   }
@@ -258,46 +242,81 @@ function closeCameraModal() {
   }
 }
 
-function setLoadedBill(bill) {
-  STATE.currentBill = bill;
-  // Initialize default assignments: all items shared by everyone
-  STATE.assignments = {};
-  bill.items.forEach((item) => {
-    STATE.assignments[item.id] = {
-      is_all: true,
-      assigned_to: new Set(STATE.members),
-    };
-  });
-  populateReviewScreen();
+// ==========================================
+// BENCHMARK SUITE (12 TEST BILLS)
+// ==========================================
+async function loadSampleBills() {
+  const grid = document.getElementById("sample-grid");
+  grid.innerHTML = "<p>Loading benchmark cases...</p>";
+
+  try {
+    const res = await fetch("/api/sample-bills");
+    const data = await res.json();
+    grid.innerHTML = "";
+
+    data.bills.forEach((bill) => {
+      const card = document.createElement("div");
+      card.className = "sample-card";
+      card.onclick = () => selectBenchmarkBill(bill.bill_id);
+
+      const isFaulty = !bill.is_arithmetically_valid;
+      const tagClass = isFaulty ? "sample-tag tag-error" : "sample-tag";
+
+      card.innerHTML = `
+        <div class="sample-top">
+          <span class="${tagClass}">${bill.condition_tag}</span>
+          <span style="font-size: 0.75rem; color: #64748b;">${bill.items_count} items</span>
+        </div>
+        <div class="sample-name">${bill.bill_name}</div>
+        <div class="sample-desc">${bill.challenge_description}</div>
+        <div class="sample-footer">
+          <span>Printed Total:</span>
+          <span class="sample-total">INR ${bill.grand_total.toFixed(2)}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    grid.innerHTML = `<p style="color: red;">Error loading benchmark suite: ${err.message}</p>`;
+  }
+}
+
+async function selectBenchmarkBill(billId) {
+  try {
+    const res = await fetch(`/api/bills/${billId}`);
+    if (!res.ok) throw new Error("Could not retrieve benchmark data");
+    const bill = await res.json();
+    setLoadedBill(bill);
+    switchView("splitter");
+    goToStep(2);
+  } catch (err) {
+    alert(`Error loading benchmark bill: ${err.message}`);
+  }
 }
 
 // ==========================================
-// STEP 2: REVIEW & CONFIDENCE EDIT
+// STEP 2: VERIFICATION & CONFIDENCE REVIEW
 // ==========================================
 function populateReviewScreen() {
   const bill = STATE.currentBill;
   if (!bill) return;
 
-  // Set image preview
   const imgPreview = document.getElementById("bill-img-preview");
   imgPreview.src = bill.image_url || "/test_bills/bill_01_dim_light.jpg";
-  document.getElementById("preview-bill-title").textContent = bill.metadata.restaurant_name || "Receipt Photo";
+  document.getElementById("preview-bill-title").textContent = bill.metadata.restaurant_name || "Source Receipt";
   document.getElementById("condition-badge").textContent = bill.condition_tag || "Standard";
 
-  // Check Discrepancy
   const discBanner = document.getElementById("discrepancy-banner");
   if (!bill.metadata.is_arithmetically_valid) {
     discBanner.style.display = "flex";
     document.getElementById("discrepancy-desc").textContent = 
-      `Notice: Cashier printed total is ₹${bill.metadata.grand_total.toFixed(2)}, which differs from items + tax calculation by ${bill.metadata.discrepancy_amount > 0 ? "+" : ""}₹${bill.metadata.discrepancy_amount.toFixed(2)}. You can review items below or adjust totals.`;
+      `Discrepancy: Printed total is INR ${bill.metadata.grand_total.toFixed(2)}, which differs from calculated line items + taxes by ${bill.metadata.discrepancy_amount > 0 ? "+" : ""}INR ${bill.metadata.discrepancy_amount.toFixed(2)}. Adjust items or override total below.`;
   } else {
     discBanner.style.display = "none";
   }
 
-  // Populate Items Table
   renderReviewTable();
 
-  // Populate Metadata
   document.getElementById("meta-subtotal").value = bill.metadata.subtotal.toFixed(2);
   document.getElementById("meta-cgst").value = bill.metadata.taxes.cgst.toFixed(2);
   document.getElementById("meta-sgst").value = bill.metadata.taxes.sgst.toFixed(2);
@@ -313,7 +332,6 @@ function renderReviewTable() {
 
   STATE.currentBill.items.forEach((item, index) => {
     const tr = document.createElement("tr");
-
     const confPct = Math.round((item.confidence || 0.9) * 100);
     const confClass = confPct >= 85 ? "conf-good" : "conf-warn";
 
@@ -334,7 +352,7 @@ function renderReviewTable() {
         <span class="conf-badge ${confClass}">${confPct}%</span>
       </td>
       <td>
-        <button class="btn-icon-del" onclick="deleteLineItem(${index})">×</button>
+        <button class="btn-icon-del" onclick="deleteLineItem(${index})" title="Delete item">&times;</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -377,17 +395,17 @@ function deleteLineItem(idx) {
 }
 
 function addNewLineItem() {
-  const newId = `item_user_${Date.now()}`;
+  const newId = `item_custom_${Date.now()}`;
   STATE.currentBill.items.push({
     id: newId,
-    name: "New Item",
+    name: "Custom Item",
     quantity: 1.0,
     unit_price: 100.0,
     total_price: 100.0,
     confidence: 1.0,
   });
   STATE.assignments[newId] = {
-    is_all: true,
+    is_all: STATE.members.length > 0,
     assigned_to: new Set(STATE.members),
   };
   renderReviewTable();
@@ -411,14 +429,12 @@ function recalculateReviewTotals() {
   STATE.currentBill.metadata.taxes.service_charge = sc;
   STATE.currentBill.metadata.taxes.discount = disc;
 
-  // Calculate new grand total if user is not locking it
   const calculatedGrand = Math.round((itemsSum + cgst + sgst + vat + sc - disc) * 100) / 100;
   STATE.currentBill.metadata.grand_total = calculatedGrand;
   document.getElementById("meta-grand-total").value = calculatedGrand.toFixed(2);
 }
 
 function proceedToAssignment() {
-  // Sync metadata from inputs
   STATE.currentBill.metadata.subtotal = parseFloat(document.getElementById("meta-subtotal").value) || 0;
   STATE.currentBill.metadata.taxes.cgst = parseFloat(document.getElementById("meta-cgst").value) || 0;
   STATE.currentBill.metadata.taxes.sgst = parseFloat(document.getElementById("meta-sgst").value) || 0;
@@ -433,12 +449,24 @@ function proceedToAssignment() {
 }
 
 // ==========================================
-// STEP 3: INTERACTIVE MEMBER CHIPS (WAY A)
+// STEP 3: PARTICIPANT CHIPS (WAY A)
 // ==========================================
 function renderMembersList() {
   const container = document.getElementById("members-list");
+  const emptyAlert = document.getElementById("empty-members-alert");
+  const ticker = document.getElementById("live-spend-ticker");
+
   container.innerHTML = "";
   document.getElementById("member-count").textContent = STATE.members.length;
+
+  if (STATE.members.length === 0) {
+    emptyAlert.style.display = "block";
+    ticker.style.display = "none";
+    return;
+  }
+
+  emptyAlert.style.display = "none";
+  ticker.style.display = "flex";
 
   STATE.members.forEach((m) => {
     const pill = document.createElement("div");
@@ -449,7 +477,7 @@ function renderMembersList() {
     pill.innerHTML = `
       <span class="member-avatar" style="background-color: ${color};">${initial}</span>
       <span>${m}</span>
-      <span class="remove-member" title="Remove friend" onclick="removeMember('${m}')">×</span>
+      <span class="remove-member" title="Remove participant" onclick="removeMember('${m}')">&times;</span>
     `;
     container.appendChild(pill);
   });
@@ -466,19 +494,21 @@ function addMemberFromInput() {
   const name = input.value.trim();
   if (!name) return;
   if (STATE.members.includes(name)) {
-    alert("This member is already added.");
+    alert("This participant is already registered.");
     return;
   }
   STATE.members.push(name);
   input.value = "";
   renderMembersList();
 
-  // If items are currently shared with all, add the new member to assignments
-  Object.keys(STATE.assignments).forEach((itemId) => {
-    if (STATE.assignments[itemId].is_all) {
-      STATE.assignments[itemId].assigned_to.add(name);
-    }
-  });
+  // If items are currently shared with all, add the new member
+  if (STATE.currentBill) {
+    Object.keys(STATE.assignments).forEach((itemId) => {
+      if (STATE.assignments[itemId].is_all) {
+        STATE.assignments[itemId].assigned_to.add(name);
+      }
+    });
+  }
 
   if (STATE.currentStep === 3) {
     renderAssignmentTable();
@@ -487,10 +517,6 @@ function addMemberFromInput() {
 }
 
 function removeMember(name) {
-  if (STATE.members.length <= 1) {
-    alert("You need at least 1 person to split the bill.");
-    return;
-  }
   STATE.members = STATE.members.filter((m) => m !== name);
   Object.keys(STATE.assignments).forEach((itemId) => {
     STATE.assignments[itemId].assigned_to.delete(name);
@@ -504,49 +530,53 @@ function renderAssignmentTable() {
   const tbody = document.getElementById("assignment-table-body");
   tbody.innerHTML = "";
 
+  if (!STATE.currentBill) return;
+
   STATE.currentBill.items.forEach((item) => {
     const tr = document.createElement("tr");
 
-    // Ensure assignment entry exists
     if (!STATE.assignments[item.id]) {
       STATE.assignments[item.id] = { is_all: true, assigned_to: new Set(STATE.members) };
     }
     const asgn = STATE.assignments[item.id];
 
-    // Build chips HTML
-    const isAllActive = asgn.is_all;
-    let chipsHtml = `
-      <div class="chips-container">
-        <button class="assign-chip chip-all ${isAllActive ? 'active' : ''}" onclick="toggleAssignAll('${item.id}')">
-          👥 Everyone
-        </button>
-    `;
+    let chipsHtml = `<div class="chips-container">`;
 
-    STATE.members.forEach((m) => {
-      const isMemberActive = asgn.assigned_to.has(m);
+    if (STATE.members.length === 0) {
+      chipsHtml += `<span style="font-size:0.8rem; color:#94a3b8;">Add members above to allocate</span>`;
+    } else {
+      const isAllActive = asgn.is_all;
       chipsHtml += `
-        <button class="assign-chip ${isMemberActive ? 'active' : ''}" onclick="toggleAssignMember('${item.id}', '${m}')">
-          ${m}
+        <button class="assign-chip chip-all ${isAllActive ? 'active' : ''}" onclick="toggleAssignAll('${item.id}')">
+          All Members
         </button>
       `;
-    });
+
+      STATE.members.forEach((m) => {
+        const isMemberActive = asgn.assigned_to.has(m);
+        chipsHtml += `
+          <button class="assign-chip ${isMemberActive ? 'active' : ''}" onclick="toggleAssignMember('${item.id}', '${m}')">
+            ${m}
+          </button>
+        `;
+      });
+    }
     chipsHtml += `</div>`;
 
-    // Compute cost per person
-    const activeCount = asgn.assigned_to.size || STATE.members.length;
+    const activeCount = asgn.assigned_to.size || (STATE.members.length > 0 ? STATE.members.length : 1);
     const perPerson = (item.total_price / activeCount).toFixed(2);
 
     tr.innerHTML = `
       <td>
         <strong>${item.name}</strong>
-        <div style="font-size: 0.8rem; color: #64748b;">Qty: ${item.quantity} × ₹${item.unit_price.toFixed(2)}</div>
+        <div style="font-size: 0.78rem; color: #64748b;">Qty: ${item.quantity} &times; INR ${item.unit_price.toFixed(2)}</div>
       </td>
       <td>
-        <strong style="font-family: var(--font-mono);">₹${item.total_price.toFixed(2)}</strong>
+        <strong style="font-family: var(--font-mono);">INR ${item.total_price.toFixed(2)}</strong>
       </td>
       <td>${chipsHtml}</td>
       <td>
-        <span class="split-cost-badge">₹${perPerson}/ea</span>
+        <span class="split-cost-badge">INR ${perPerson}/head</span>
       </td>
     `;
     tbody.appendChild(tr);
@@ -581,31 +611,41 @@ function toggleAssignMember(itemId, member) {
 }
 
 function assignAllToEveryone() {
-  STATE.currentBill.items.forEach((item) => {
-    STATE.assignments[item.id] = {
-      is_all: true,
-      assigned_to: new Set(STATE.members),
-    };
-  });
-  renderAssignmentTable();
-  updateLiveSpendTicker();
+  if (STATE.currentBill) {
+    STATE.currentBill.items.forEach((item) => {
+      STATE.assignments[item.id] = {
+        is_all: true,
+        assigned_to: new Set(STATE.members),
+      };
+    });
+    renderAssignmentTable();
+    updateLiveSpendTicker();
+  }
 }
 
 function updateLiveSpendTicker() {
   const ticker = document.getElementById("live-spend-ticker");
+  if (STATE.members.length === 0) {
+    ticker.style.display = "none";
+    return;
+  }
+
+  ticker.style.display = "flex";
   ticker.innerHTML = "";
 
   const memberSpend = {};
   STATE.members.forEach((m) => (memberSpend[m] = 0.0));
 
-  STATE.currentBill.items.forEach((item) => {
-    const asgn = STATE.assignments[item.id];
-    const targets = asgn.assigned_to.size > 0 ? Array.from(asgn.assigned_to) : STATE.members;
-    const share = item.total_price / targets.length;
-    targets.forEach((m) => {
-      if (memberSpend[m] !== undefined) memberSpend[m] += share;
+  if (STATE.currentBill) {
+    STATE.currentBill.items.forEach((item) => {
+      const asgn = STATE.assignments[item.id];
+      const targets = asgn.assigned_to.size > 0 ? Array.from(asgn.assigned_to) : STATE.members;
+      const share = item.total_price / (targets.length || 1);
+      targets.forEach((m) => {
+        if (memberSpend[m] !== undefined) memberSpend[m] += share;
+      });
     });
-  });
+  }
 
   STATE.members.forEach((m) => {
     const item = document.createElement("div");
@@ -614,17 +654,21 @@ function updateLiveSpendTicker() {
     item.innerHTML = `
       <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color};"></span>
       <span class="ticker-name">${m}:</span>
-      <span class="ticker-val">₹${memberSpend[m].toFixed(2)}</span>
+      <span class="ticker-val">INR ${memberSpend[m].toFixed(2)}</span>
     `;
     ticker.appendChild(item);
   });
 }
 
 // ==========================================
-// STEP 4: FINAL BREAKDOWN
+// STEP 4: SETTLEMENT BREAKDOWN
 // ==========================================
 async function computeFinalSplit() {
-  // Format assignments for backend API
+  if (STATE.members.length === 0) {
+    alert("Please add at least one participant before computing settlement.");
+    return;
+  }
+
   const formattedAssignments = STATE.currentBill.items.map((item) => {
     const asgn = STATE.assignments[item.id];
     return {
@@ -649,7 +693,7 @@ async function computeFinalSplit() {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.detail || "Calculation failed");
+      throw new Error(err.detail || "Settlement calculation error");
     }
 
     const result = await res.json();
@@ -657,29 +701,27 @@ async function computeFinalSplit() {
     renderFinalBreakdown(result);
     goToStep(4);
   } catch (err) {
-    alert(`Split Calculation Error: ${err.message}`);
+    alert(`Settlement Error: ${err.message}`);
   }
 }
 
 function renderFinalBreakdown(result) {
-  // Populate Hero Header
-  document.getElementById("res-grand-total").textContent = `₹${result.bill_grand_total.toFixed(2)}`;
-  document.getElementById("res-subtotal").textContent = `₹${STATE.currentBill.metadata.subtotal.toFixed(2)}`;
+  document.getElementById("res-grand-total").textContent = `INR ${result.bill_grand_total.toFixed(2)}`;
+  document.getElementById("res-subtotal").textContent = `INR ${STATE.currentBill.metadata.subtotal.toFixed(2)}`;
   
   const taxesObj = STATE.currentBill.metadata.taxes;
   const totalTaxesAndFees = (taxesObj.cgst + taxesObj.sgst + taxesObj.vat + taxesObj.service_charge - taxesObj.discount).toFixed(2);
-  document.getElementById("res-taxes").textContent = `₹${totalTaxesAndFees}`;
+  document.getElementById("res-taxes").textContent = `INR ${totalTaxesAndFees}`;
 
   const balanceBadge = document.getElementById("res-balance-badge");
   if (result.is_balanced) {
     balanceBadge.className = "badge badge-success";
-    balanceBadge.textContent = "✓ Exact Penny Match";
+    balanceBadge.textContent = "Exact Penny Reconciled";
   } else {
     balanceBadge.className = "badge badge-danger";
-    balanceBadge.textContent = "⚠️ Unbalanced Total";
+    balanceBadge.textContent = "Unbalanced Total";
   }
 
-  // Populate Member Cards Grid
   const grid = document.getElementById("member-cards-grid");
   grid.innerHTML = "";
 
@@ -698,7 +740,7 @@ function renderFinalBreakdown(result) {
             <span>${item.item_name}</span>
             <span class="item-share-tag">(${sharePct}%)</span>
           </div>
-          <span style="font-family: var(--font-mono); font-weight: 600;">₹${item.member_charge.toFixed(2)}</span>
+          <span style="font-family: var(--font-mono); font-weight: 600;">INR ${item.member_charge.toFixed(2)}</span>
         </li>
       `;
     });
@@ -710,7 +752,7 @@ function renderFinalBreakdown(result) {
             <span class="member-card-avatar" style="background-color: ${color};">${initial}</span>
             <span class="member-card-name">${member.member_name}</span>
           </div>
-          <span class="member-card-ratio">${(member.spend_fraction * 100).toFixed(1)}% of food</span>
+          <span class="member-card-ratio">${(member.spend_fraction * 100).toFixed(1)}% of subtotal</span>
         </div>
 
         <ul class="consumed-list">
@@ -720,30 +762,30 @@ function renderFinalBreakdown(result) {
         <div class="calc-breakdown-box">
           <div class="calc-row">
             <span>Food Subtotal:</span>
-            <span>₹${member.food_subtotal.toFixed(2)}</span>
+            <span>INR ${member.food_subtotal.toFixed(2)}</span>
           </div>
           <div class="calc-row tax-row">
             <span>Proportional GST/VAT:</span>
-            <span>+₹${member.tax_share.toFixed(2)}</span>
+            <span>+INR ${member.tax_share.toFixed(2)}</span>
           </div>
           ${member.service_charge_share > 0 ? `
             <div class="calc-row">
-              <span>Proportional Service Charge:</span>
-              <span>+₹${member.service_charge_share.toFixed(2)}</span>
+              <span>Proportional Service Fee:</span>
+              <span>+INR ${member.service_charge_share.toFixed(2)}</span>
             </div>
           ` : ''}
           ${member.discount_share > 0 ? `
             <div class="calc-row disc-row">
               <span>Proportional Discount:</span>
-              <span>-₹${member.discount_share.toFixed(2)}</span>
+              <span>-INR ${member.discount_share.toFixed(2)}</span>
             </div>
           ` : ''}
         </div>
       </div>
 
       <div class="final-pay-box">
-        <span class="final-pay-label">Total to Pay:</span>
-        <span class="final-pay-amount">₹${member.final_total.toFixed(2)}</span>
+        <span class="final-pay-label">Total Payable:</span>
+        <span class="final-pay-amount">INR ${member.final_total.toFixed(2)}</span>
       </div>
     `;
     grid.appendChild(card);
@@ -753,18 +795,18 @@ function renderFinalBreakdown(result) {
 function copyWhatsAppFormat() {
   if (!STATE.splitResult) return;
   const result = STATE.splitResult;
-  const restName = STATE.currentBill.metadata.restaurant_name || "Dinner";
+  const restName = STATE.currentBill.metadata.restaurant_name || "Receipt";
 
-  let msg = `🧾 *Bill Split Summary - ${restName}*\n`;
-  msg += `Total Bill: ₹${result.bill_grand_total.toFixed(2)}\n`;
+  let msg = `Bill Settlement: ${restName}\n`;
+  msg += `Total Amount: INR ${result.bill_grand_total.toFixed(2)}\n`;
   msg += `------------------------------------\n`;
   result.members.forEach((m) => {
-    msg += `• *${m.member_name}*: ₹${m.final_total.toFixed(2)} (${(m.spend_fraction * 100).toFixed(0)}% share)\n`;
+    msg += `• ${m.member_name}: INR ${m.final_total.toFixed(2)} (${(m.spend_fraction * 100).toFixed(0)}% spend ratio)\n`;
   });
   msg += `------------------------------------\n`;
-  msg += `✨ Split mathematically fair using SmartBill AI`;
+  msg += `Calculated via SmartBill Engine`;
 
   navigator.clipboard.writeText(msg).then(() => {
-    alert("Copied summary to clipboard! Paste directly into WhatsApp or UPI app.");
+    alert("Settlement summary copied to clipboard.");
   });
 }
