@@ -6,7 +6,8 @@
 
 ## 🚀 Key Features
 
-1. **Photo in, Structured Bill Out**:
+1. **Photo in, Structured Bill Out (Upload & Live Camera)**:
+   - **Dual Ingestion**: Users can upload existing receipt images (drag-and-drop or browse) **OR click a live photo directly with their device camera/webcam** via an interactive camera modal.
    - Parses restaurant receipts into a strict **Pydantic model** (`BillItem`, `BillTaxes`, `BillMetadata`, `ParsedBill`).
    - Extracts item descriptions, quantities, unit prices, total prices, subtotals, CGST/SGST/VAT, service charges, discounts, and grand totals.
    - Computes **per-field confidence scores** (0.0 to 1.0) based on OCR visual clarity.
