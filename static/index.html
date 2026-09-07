@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Bill Splitter - Split the Bill From a Photograph</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">🧾</div>
+        <div>
+          <h1 class="brand-title">SmartBill AI</h1>
+          <p class="brand-subtitle">Proportional Fair-Share Splitter from Photographs</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-light-blue">📷 Multimodal OCR</span>
+        <span class="badge badge-light-purple">⚖️ Proportional Math</span>
+        <span class="badge badge-light-green">🎯 12 Test Cases Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Stepper Navigation -->
+    <nav class="stepper">
+      <button class="step-btn active" id="step-btn-1" onclick="goToStep(1)">
+        <span class="step-num">1</span>
+        <span class="step-label">Upload or Pick Bill</span>
+      </button>
+      <div class="step-divider"></div>
+      <button class="step-btn" id="step-btn-2" onclick="goToStep(2)">
+        <span class="step-num">2</span>
+        <span class="step-label">Review & Confidence</span>
+      </button>
+      <div class="step-divider"></div>
+      <button class="step-btn" id="step-btn-3" onclick="goToStep(3)">
+        <span class="step-num">3</span>
+        <span class="step-label">Interactive Member Chips</span>
+      </button>
+      <div class="step-divider"></div>
+      <button class="step-btn" id="step-btn-4" onclick="goToStep(4)">
+        <span class="step-num">4</span>
+        <span class="step-label">Fair Breakdown</span>
+      </button>
+    </nav>
+
+    <!-- STEP 1: UPLOAD / PICK BILL -->
+    <section id="step-1" class="step-section active">
+      <div class="section-intro">
+        <h2>Choose a Bill to Split</h2>
+        <p>Upload any receipt photo from your device, or test instantly using one of the 12 challenging edge-case receipts below.</p>
+      </div>
+
+      <!-- Upload Drop Zone -->
+      <div class="upload-card">
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">📸</div>
+          <h3>Upload Receipt Photo</h3>
+          <p>Drag and drop a JPG or PNG here, or browse from your computer</p>
+          <input type="file" id="file-input" accept="image/*" style="display: none;">
+          <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Browse Photo</button>
+          <div id="upload-status" class="upload-status"></div>
+        </div>
+      </div>
+
+      <!-- 12 Test Cases Gallery -->
+      <div class="gallery-header">
+        <div class="gallery-title-box">
+          <h3>Pre-loaded Test Suite (12 Challenging Conditions)</h3>
+          <p>Click any card to immediately load its image, OCR confidence ratings, and data.</p>
+        </div>
+        <span class="badge badge-accent">Ground Truth Labeled</span>
+      </div>
+
+      <div class="sample-grid" id="sample-grid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- STEP 2: REVIEW & CONFIDENCE -->
+    <section id="step-2" class="step-section">
+      <div class="section-intro">
+        <h2>Step 2: Human-in-the-Loop Review</h2>
+        <p>Inspect extracted line items, review per-field OCR confidence, and correct any blurry text before splitting.</p>
+      </div>
+
+      <!-- Discrepancy Alert Box -->
+      <div id="discrepancy-banner" class="alert-banner alert-warning" style="display: none;">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <h4>Printed Arithmetic Error Detected!</h4>
+          <p id="discrepancy-desc">The restaurant's printed receipt total differs from items + tax calculation.</p>
+        </div>
+      </div>
+
+      <div class="review-split-layout">
+        <!-- Receipt Image Preview -->
+        <div class="preview-panel card">
+          <div class="panel-header">
+            <h3 id="preview-bill-title">Receipt Photo</h3>
+            <span id="condition-badge" class="badge badge-light-blue">Receipt</span>
+          </div>
+          <div class="image-container">
+            <img id="bill-img-preview" src="" alt="Receipt Image Preview">
+          </div>
+          <div class="image-note">
+            <span id="bill-challenge-text">Original receipt photo captured under test condition.</span>
+          </div>
+        </div>
+
+        <!-- Editable Data Table -->
+        <div class="data-panel card">
+          <div class="panel-header">
+            <div>
+              <h3>Extracted Line Items</h3>
+              <p class="subtitle">Confidence scores: <span class="conf-high">Green $\ge$ 85%</span> | <span class="conf-med">Amber &lt; 85%</span></p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="addNewLineItem()">+ Add Item</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="items-table" id="review-items-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th style="width: 70px;">Qty</th>
+                  <th style="width: 100px;">Price (₹)</th>
+                  <th style="width: 100px;">Total (₹)</th>
+                  <th style="width: 100px;">Confidence</th>
+                  <th style="width: 40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="review-items-body">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Metadata & Taxes Breakdown -->
+          <div class="metadata-grid">
+            <div class="meta-field">
+              <label>Subtotal (₹)</label>
+              <input type="number" step="0.01" id="meta-subtotal" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field">
+              <label>CGST (₹)</label>
+              <input type="number" step="0.01" id="meta-cgst" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field">
+              <label>SGST (₹)</label>
+              <input type="number" step="0.01" id="meta-sgst" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field">
+              <label>VAT / Liquor (₹)</label>
+              <input type="number" step="0.01" id="meta-vat" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field">
+              <label>Service Charge (₹)</label>
+              <input type="number" step="0.01" id="meta-service-charge" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field">
+              <label>Discount (₹)</label>
+              <input type="number" step="0.01" id="meta-discount" onchange="recalculateReviewTotals()">
+            </div>
+            <div class="meta-field highlight-field">
+              <label>Grand Total (₹)</label>
+              <input type="number" step="0.01" id="meta-grand-total">
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <button class="btn btn-outline" onclick="goToStep(1)">← Back to Bill Selection</button>
+            <button class="btn btn-primary" onclick="proceedToAssignment()">Continue to Member Chips →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: INTERACTIVE MEMBER ASSIGNMENT (CHIPS) -->
+    <section id="step-3" class="step-section">
+      <div class="section-intro">
+        <h2>Step 3: Interactive Member Chips (Way A)</h2>
+        <p>Add the friends who ate dinner, then click member chips on each dish to define who ate what. Proportions update instantly.</p>
+      </div>
+
+      <!-- Member Management Bar -->
+      <div class="members-card card">
+        <div class="members-header">
+          <div class="members-title">
+            <h3>Dinner Participants (<span id="member-count">3</span>)</h3>
+            <p>Click a chip to remove, or type a new name and press Enter.</p>
+          </div>
+          <div class="member-input-group">
+            <input type="text" id="new-member-input" placeholder="Enter friend's name (e.g. Rohan)" onkeypress="handleMemberInput(event)">
+            <button class="btn btn-secondary" onclick="addMemberFromInput()">Add Friend</button>
+          </div>
+        </div>
+        <div class="member-chips-list" id="members-list">
+          <!-- Member pills injected via JS -->
+        </div>
+        <!-- Live spend summary bar across members -->
+        <div class="live-spend-ticker" id="live-spend-ticker">
+          <!-- Real-time spending preview injected via JS -->
+        </div>
+      </div>
+
+      <!-- Item Assignment Table -->
+      <div class="assignment-card card">
+        <div class="panel-header">
+          <div>
+            <h3>Assign Dishes to Members</h3>
+            <p class="subtitle">Click <strong>[Everyone]</strong> to split equally, or select specific member chips.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="assignAllToEveryone()">Reset: All to Everyone</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="assignment-table">
+            <thead>
+              <tr>
+                <th style="width: 32%;">Item & Quantity</th>
+                <th style="width: 15%;">Total Price</th>
+                <th style="width: 40%;">Assigned To (Click Chips to Toggle)</th>
+                <th style="width: 13%;">Cost / Person</th>
+              </tr>
+            </thead>
+            <tbody id="assignment-table-body">
+              <!-- Injected via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-outline" onclick="goToStep(2)">← Back to Review</button>
+          <button class="btn btn-primary btn-lg" onclick="computeFinalSplit()">Calculate Proportional Split ✨</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: DETAILED BREAKDOWN -->
+    <section id="step-4" class="step-section">
+      <div class="section-intro">
+        <h2>Step 4: Mathematically Fair Price Breakdown</h2>
+        <p>Taxes, discounts, and service charges are distributed strictly in proportion to what each person ate.</p>
+      </div>
+
+      <!-- Summary Banner -->
+      <div class="summary-hero card">
+        <div class="hero-col">
+          <span class="hero-label">Bill Grand Total</span>
+          <span class="hero-value" id="res-grand-total">₹0.00</span>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-col">
+          <span class="hero-label">Food Subtotal</span>
+          <span class="hero-value text-muted" id="res-subtotal">₹0.00</span>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-col">
+          <span class="hero-label">Total Taxes & Fees</span>
+          <span class="hero-value text-muted" id="res-taxes">₹0.00</span>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-col">
+          <span class="hero-label">Balance Status</span>
+          <span class="badge badge-success" id="res-balance-badge">✓ Exact Penny Match</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="breakdown-actions">
+        <button class="btn btn-secondary" onclick="copyWhatsAppFormat()">📋 Copy Summary for WhatsApp / UPI</button>
+        <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="btn btn-outline" onclick="goToStep(3)">← Adjust Member Chips</button>
+      </div>
+
+      <!-- Member Breakdown Cards Grid -->
+      <div class="member-cards-grid" id="member-cards-grid">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Explanation Box -->
+      <div class="info-card card">
+        <h4>💡 Why Proportional Tax Math Matters:</h4>
+        <p>If someone only ordered a ₹60 soda while someone else ate a ₹350 biryani, splitting the ₹40 GST equally is unfair. Our engine allocates tax and service charge according to each person's exact percentage of total food consumed ($S_i / S_{total}$), ensuring everyone pays their fair mathematical share.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Split the Bill From a Photograph • Placement Round Project • Light Mode Edition</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
