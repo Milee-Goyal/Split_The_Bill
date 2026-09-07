@@ -119,40 +119,142 @@ function setupUploadListeners() {
     e.preventDefault();
     dropZone.style.borderColor = "#e2e8f0";
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      handleReceiptFile(e.dataTransfer.files[0]);
     }
   });
 
   fileInput.addEventListener("change", (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFileUpload(e.target.files[0]);
+      handleReceiptFile(e.target.files[0]);
     }
   });
+}
 
-  async function handleFileUpload(file) {
-    statusBox.textContent = `Processing receipt photo "${file.name}" via OCR...`;
-    statusBox.style.color = "#4f46e5";
+async function handleReceiptFile(file) {
+  const statusBox = document.getElementById("upload-status");
+  statusBox.textContent = `Processing receipt photo "${file.name || 'camera_snap.jpg'}" via OCR...`;
+  statusBox.style.color = "#4f46e5";
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append("file", file, file.name || "camera_snap.jpg");
 
+  try {
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("Extraction failed");
+    const bill = await res.json();
+    statusBox.textContent = "✓ Extracted successfully! Moving to Review...";
+    statusBox.style.color = "#10b981";
+    setTimeout(() => {
+      setLoadedBill(bill);
+      goToStep(2);
+    }, 500);
+  } catch (err) {
+    statusBox.textContent = `Upload error: ${err.message}`;
+    statusBox.style.color = "#ef4444";
+  }
+}
+
+// ==========================================
+// CAMERA CAPTURE (CLICK PHOTO)
+// ==========================================
+let cameraStream = null;
+let capturedBlob = null;
+
+async function openCameraModal() {
+  const modal = document.getElementById("camera-modal");
+  const video = document.getElementById("camera-video");
+  const canvas = document.getElementById("camera-canvas");
+  const errBox = document.getElementById("camera-error");
+  const btnSnap = document.getElementById("btn-snap");
+  const btnRetake = document.getElementById("btn-retake");
+  const btnUse = document.getElementById("btn-use-photo");
+
+  modal.style.display = "flex";
+  video.style.display = "block";
+  canvas.style.display = "none";
+  errBox.style.display = "none";
+  btnSnap.style.display = "inline-flex";
+  btnRetake.style.display = "none";
+  btnUse.style.display = "none";
+  capturedBlob = null;
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false,
+    });
+    video.srcObject = cameraStream;
+  } catch (err) {
+    console.warn("Could not access environment camera, falling back to default:", err);
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Extraction failed");
-      const bill = await res.json();
-      statusBox.textContent = "✓ Extracted successfully! Moving to Review...";
-      statusBox.style.color = "#10b981";
-      setTimeout(() => {
-        setLoadedBill(bill);
-        goToStep(2);
-      }, 500);
-    } catch (err) {
-      statusBox.textContent = `Upload error: ${err.message}`;
-      statusBox.style.color = "#ef4444";
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      video.srcObject = cameraStream;
+    } catch (fallbackErr) {
+      errBox.style.display = "block";
+      errBox.textContent = `Camera error: ${fallbackErr.message}. Please allow camera permissions in your browser.`;
+      btnSnap.style.display = "none";
     }
+  }
+}
+
+function captureSnapshot() {
+  const video = document.getElementById("camera-video");
+  const canvas = document.getElementById("camera-canvas");
+  const btnSnap = document.getElementById("btn-snap");
+  const btnRetake = document.getElementById("btn-retake");
+  const btnUse = document.getElementById("btn-use-photo");
+
+  if (!video.videoWidth) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  video.style.display = "none";
+  canvas.style.display = "block";
+
+  btnSnap.style.display = "none";
+  btnRetake.style.display = "inline-flex";
+  btnUse.style.display = "inline-flex";
+
+  canvas.toBlob((blob) => {
+    capturedBlob = blob;
+  }, "image/jpeg", 0.95);
+}
+
+function retakeSnapshot() {
+  const video = document.getElementById("camera-video");
+  const canvas = document.getElementById("camera-canvas");
+  const btnSnap = document.getElementById("btn-snap");
+  const btnRetake = document.getElementById("btn-retake");
+  const btnUse = document.getElementById("btn-use-photo");
+
+  video.style.display = "block";
+  canvas.style.display = "none";
+
+  btnSnap.style.display = "inline-flex";
+  btnRetake.style.display = "none";
+  btnUse.style.display = "none";
+  capturedBlob = null;
+}
+
+function useCapturedPhoto() {
+  if (!capturedBlob) return;
+  const file = new File([capturedBlob], `receipt_${Date.now()}.jpg`, { type: "image/jpeg" });
+  closeCameraModal();
+  handleReceiptFile(file);
+}
+
+function closeCameraModal() {
+  const modal = document.getElementById("camera-modal");
+  modal.style.display = "none";
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop());
+    cameraStream = null;
   }
 }
 

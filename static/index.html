@@ -64,11 +64,41 @@
       <div class="upload-card">
         <div class="drop-zone" id="drop-zone">
           <div class="drop-icon">📸</div>
-          <h3>Upload Receipt Photo</h3>
-          <p>Drag and drop a JPG or PNG here, or browse from your computer</p>
+          <h3>Upload or Click Receipt Photo</h3>
+          <p>You can upload a receipt file from your device, or use your camera to take a photo directly.</p>
           <input type="file" id="file-input" accept="image/*" style="display: none;">
-          <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Browse Photo</button>
+          <div class="upload-btn-group">
+            <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+              📁 Browse Photo
+            </button>
+            <button class="btn btn-secondary" onclick="openCameraModal()">
+              📷 Take Photo with Camera
+            </button>
+          </div>
           <div id="upload-status" class="upload-status"></div>
+        </div>
+      </div>
+
+      <!-- Camera Modal -->
+      <div id="camera-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>📷 Take Receipt Photo</h3>
+            <button class="btn-close" onclick="closeCameraModal()">×</button>
+          </div>
+          <div class="camera-body">
+            <div class="video-wrapper">
+              <video id="camera-video" autoplay playsinline></video>
+              <canvas id="camera-canvas" style="display: none;"></canvas>
+            </div>
+            <div id="camera-error" class="camera-error" style="display: none;"></div>
+          </div>
+          <div class="modal-footer">
+            <button id="btn-snap" class="btn btn-primary" onclick="captureSnapshot()">📸 Click Photo</button>
+            <button id="btn-retake" class="btn btn-outline" onclick="retakeSnapshot()" style="display: none;">🔄 Retake</button>
+            <button id="btn-use-photo" class="btn btn-success" onclick="useCapturedPhoto()" style="display: none;">✓ Use This Photo</button>
+            <button class="btn btn-outline" onclick="closeCameraModal()">Cancel</button>
+          </div>
         </div>
       </div>
 
