@@ -1,0 +1,410 @@
+{
+  "bills": [
+    {
+      "bill_id": "bill_01_dim_light",
+      "bill_name": "Haveli Restaurant (Dim Light)",
+      "condition_tag": "Dim Light Ambiance",
+      "challenge_description": "Low lux environment with warm amber restaurant lighting and high shadow noise.",
+      "image_url": "/test_bills/bill_01_dim_light.jpg",
+      "items": [
+        {"id": "b1_1", "name": "Paneer Butter Masala", "quantity": 1, "unit_price": 320.0, "total_price": 320.0, "confidence": 0.88},
+        {"id": "b1_2", "name": "Butter Naan", "quantity": 2, "unit_price": 60.0, "total_price": 120.0, "confidence": 0.82},
+        {"id": "b1_3", "name": "Jeera Rice", "quantity": 1, "unit_price": 160.0, "total_price": 160.0, "confidence": 0.90},
+        {"id": "b1_4", "name": "Fresh Lime Soda", "quantity": 2, "unit_price": 70.0, "total_price": 140.0, "confidence": 0.85}
+      ],
+      "metadata": {
+        "restaurant_name": "HAVELI RESTAURANT",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 740.0,
+        "taxes": {
+          "cgst": 18.50,
+          "sgst": 18.50,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 777.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.94,
+          "cgst": 0.88,
+          "sgst": 0.88,
+          "grand_total": 0.96
+        }
+      }
+    },
+    {
+      "bill_id": "bill_02_crumpled",
+      "bill_name": "Wok & Roll Asian (Crumpled Paper)",
+      "condition_tag": "Crumpled & Creased",
+      "challenge_description": "Physical receipt was folded and crumpled in pocket, introducing crease artifacts across characters.",
+      "image_url": "/test_bills/bill_02_crumpled.jpg",
+      "items": [
+        {"id": "b2_1", "name": "Veg Hakka Noodles", "quantity": 1, "unit_price": 240.0, "total_price": 240.0, "confidence": 0.81},
+        {"id": "b2_2", "name": "Chilli Paneer Dry", "quantity": 1, "unit_price": 310.0, "total_price": 310.0, "confidence": 0.76},
+        {"id": "b2_3", "name": "Manchow Soup", "quantity": 1, "unit_price": 150.0, "total_price": 150.0, "confidence": 0.84}
+      ],
+      "metadata": {
+        "restaurant_name": "WOK & ROLL ASIAN",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 700.0,
+        "taxes": {
+          "cgst": 17.50,
+          "sgst": 17.50,
+          "vat": 0.0,
+          "service_charge": 35.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 770.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.89,
+          "service_charge": 0.82,
+          "grand_total": 0.91
+        }
+      }
+    },
+    {
+      "bill_id": "bill_03_steep_angle",
+      "bill_name": "Pizza Oven Trattoria (Steep Angle)",
+      "condition_tag": "Perspective Tilt",
+      "challenge_description": "Captured at a 40-degree slant with trapezoidal keystone distortion and focal depth falloff.",
+      "image_url": "/test_bills/bill_03_steep_angle.jpg",
+      "items": [
+        {"id": "b3_1", "name": "Margherita Pizza", "quantity": 2, "unit_price": 290.0, "total_price": 580.0, "confidence": 0.84},
+        {"id": "b3_2", "name": "Cheesy Garlic Bread", "quantity": 1, "unit_price": 190.0, "total_price": 190.0, "confidence": 0.79},
+        {"id": "b3_3", "name": "Peach Iced Tea", "quantity": 2, "unit_price": 110.0, "total_price": 220.0, "confidence": 0.82}
+      ],
+      "metadata": {
+        "restaurant_name": "PIZZA OVEN TRATTORIA",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 990.0,
+        "taxes": {
+          "cgst": 24.75,
+          "sgst": 24.75,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 1039.50,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.86,
+          "grand_total": 0.90
+        }
+      }
+    },
+    {
+      "bill_id": "bill_04_faded_thermal",
+      "bill_name": "Urban Roast Cafe (Faded Thermal Print)",
+      "condition_tag": "Faded Thermal",
+      "challenge_description": "Low thermal head contrast where dot-matrix characters fade into the white paper substrate.",
+      "image_url": "/test_bills/bill_04_faded_thermal.jpg",
+      "items": [
+        {"id": "b4_1", "name": "Cappuccino Large", "quantity": 1, "unit_price": 220.0, "total_price": 220.0, "confidence": 0.68},
+        {"id": "b4_2", "name": "Blueberry Muffin", "quantity": 1, "unit_price": 180.0, "total_price": 180.0, "confidence": 0.71},
+        {"id": "b4_3", "name": "Espresso Shot", "quantity": 1, "unit_price": 140.0, "total_price": 140.0, "confidence": 0.65}
+      ],
+      "metadata": {
+        "restaurant_name": "URBAN ROAST CAFE",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 540.0,
+        "taxes": {
+          "cgst": 13.50,
+          "sgst": 13.50,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 567.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.74,
+          "grand_total": 0.79
+        }
+      }
+    },
+    {
+      "bill_id": "bill_05_handwritten",
+      "bill_name": "Royal Punjab Dhaba (Handwritten)",
+      "condition_tag": "Handwritten Script",
+      "challenge_description": "Manual pen-and-paper receipt written in running cursive with non-standard numerical shapes.",
+      "image_url": "/test_bills/bill_05_handwritten.jpg",
+      "items": [
+        {"id": "b5_1", "name": "Dal Tadka", "quantity": 1, "unit_price": 180.0, "total_price": 180.0, "confidence": 0.72},
+        {"id": "b5_2", "name": "Tandoori Roti", "quantity": 4, "unit_price": 20.0, "total_price": 80.0, "confidence": 0.75},
+        {"id": "b5_3", "name": "Mix Veg", "quantity": 1, "unit_price": 200.0, "total_price": 200.0, "confidence": 0.70},
+        {"id": "b5_4", "name": "Boondi Raita", "quantity": 1, "unit_price": 90.0, "total_price": 90.0, "confidence": 0.73}
+      ],
+      "metadata": {
+        "restaurant_name": "ROYAL PUNJAB DHABA",
+        "date": "14/10/2025",
+        "subtotal": 550.0,
+        "taxes": {
+          "cgst": 12.50,
+          "sgst": 12.50,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 575.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.78,
+          "grand_total": 0.81
+        }
+      }
+    },
+    {
+      "bill_id": "bill_06_two_scripts",
+      "bill_name": "Purani Dilli Rasoi (Two Scripts: Devanagari & English)",
+      "condition_tag": "Bilingual / Two Scripts",
+      "challenge_description": "Item names are rendered in mixed Hindi (Devanagari) and English characters requiring cross-script handling.",
+      "image_url": "/test_bills/bill_06_two_scripts.jpg",
+      "items": [
+        {"id": "b6_1", "name": "Paneer Makhani (पनीर)", "quantity": 1, "unit_price": 340.0, "total_price": 340.0, "confidence": 0.87},
+        {"id": "b6_2", "name": "Dal Makhani (दाल मखनी)", "quantity": 1, "unit_price": 280.0, "total_price": 280.0, "confidence": 0.85},
+        {"id": "b6_3", "name": "Butter Roti (रोटी)", "quantity": 3, "unit_price": 35.0, "total_price": 105.0, "confidence": 0.89},
+        {"id": "b6_4", "name": "Gulab Jamun (गुलाब जामुन)", "quantity": 1, "unit_price": 110.0, "total_price": 110.0, "confidence": 0.86}
+      ],
+      "metadata": {
+        "restaurant_name": "PURANI DILLI RASOI",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 835.0,
+        "taxes": {
+          "cgst": 20.88,
+          "sgst": 20.88,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 876.76,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.92,
+          "grand_total": 0.94
+        }
+      }
+    },
+    {
+      "bill_id": "bill_07_long_bill",
+      "bill_name": "The Grand Banquet (Multi-Photo Long Bill)",
+      "condition_tag": "Long Multi-Page Bill",
+      "challenge_description": "Very long banquet invoice requiring continuation stitching across two sequential captures.",
+      "image_url": "/test_bills/bill_07_long_bill_p1.jpg",
+      "items": [
+        {"id": "b7_1", "name": "Crispy Corn", "quantity": 1, "unit_price": 210.0, "total_price": 210.0, "confidence": 0.94},
+        {"id": "b7_2", "name": "Spring Rolls", "quantity": 1, "unit_price": 220.0, "total_price": 220.0, "confidence": 0.93},
+        {"id": "b7_3", "name": "Chicken Tikka", "quantity": 2, "unit_price": 280.0, "total_price": 560.0, "confidence": 0.91},
+        {"id": "b7_4", "name": "Fish Fingers", "quantity": 1, "unit_price": 380.0, "total_price": 380.0, "confidence": 0.92},
+        {"id": "b7_5", "name": "Mutton Rogan Josh", "quantity": 1, "unit_price": 490.0, "total_price": 490.0, "confidence": 0.90},
+        {"id": "b7_6", "name": "Garlic Naan", "quantity": 4, "unit_price": 70.0, "total_price": 280.0, "confidence": 0.95},
+        {"id": "b7_7", "name": "Biryani Handi", "quantity": 1, "unit_price": 420.0, "total_price": 420.0, "confidence": 0.92},
+        {"id": "b7_8", "name": "Soft Drinks", "quantity": 4, "unit_price": 60.0, "total_price": 240.0, "confidence": 0.96}
+      ],
+      "metadata": {
+        "restaurant_name": "THE GRAND BANQUET",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 2800.0,
+        "taxes": {
+          "cgst": 70.0,
+          "sgst": 70.0,
+          "vat": 0.0,
+          "service_charge": 224.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 3164.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.95,
+          "service_charge": 0.93,
+          "grand_total": 0.97
+        }
+      }
+    },
+    {
+      "bill_id": "bill_08_wrong_printed_total",
+      "bill_name": "Corner Diner (Genuinely Faulty Printed Total)",
+      "condition_tag": "Faulty Printed Total",
+      "challenge_description": "The printed receipt total is ₹830.00, whereas Subtotal (₹750) + GST (₹37.50) equals ₹787.50 (+₹42.50 cashier error).",
+      "image_url": "/test_bills/bill_08_wrong_printed_total.jpg",
+      "items": [
+        {"id": "b8_1", "name": "Veg Kadhai", "quantity": 1, "unit_price": 320.0, "total_price": 320.0, "confidence": 0.95},
+        {"id": "b8_2", "name": "Dal Tadka", "quantity": 1, "unit_price": 230.0, "total_price": 230.0, "confidence": 0.94},
+        {"id": "b8_3", "name": "Laccha Paratha", "quantity": 4, "unit_price": 50.0, "total_price": 200.0, "confidence": 0.95}
+      ],
+      "metadata": {
+        "restaurant_name": "CORNER CORNER DINER",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 750.0,
+        "taxes": {
+          "cgst": 18.75,
+          "sgst": 18.75,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 830.0,
+        "is_arithmetically_valid": false,
+        "discrepancy_amount": 42.50,
+        "field_confidences": {
+          "subtotal": 0.96,
+          "cgst": 0.92,
+          "sgst": 0.92,
+          "grand_total": 0.98
+        }
+      }
+    },
+    {
+      "bill_id": "bill_09_family_feast",
+      "bill_name": "Nawab's Feast (Family Dining)",
+      "condition_tag": "Family Feast",
+      "challenge_description": "Multiple shared gravies and bread units with standard 5% restaurant GST.",
+      "image_url": "/test_bills/bill_09_family_feast.jpg",
+      "items": [
+        {"id": "b9_1", "name": "Chicken Biryani", "quantity": 2, "unit_price": 350.0, "total_price": 700.0, "confidence": 0.96},
+        {"id": "b9_2", "name": "Tandoori Platter", "quantity": 1, "unit_price": 550.0, "total_price": 550.0, "confidence": 0.94},
+        {"id": "b9_3", "name": "Mutton Korma", "quantity": 1, "unit_price": 480.0, "total_price": 480.0, "confidence": 0.92},
+        {"id": "b9_4", "name": "Rumali Roti", "quantity": 4, "unit_price": 40.0, "total_price": 160.0, "confidence": 0.95},
+        {"id": "b9_5", "name": "Mango Lassi", "quantity": 2, "unit_price": 90.0, "total_price": 180.0, "confidence": 0.97}
+      ],
+      "metadata": {
+        "restaurant_name": "NAWAB'S FEAST",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 2070.0,
+        "taxes": {
+          "cgst": 51.75,
+          "sgst": 51.75,
+          "vat": 0.0,
+          "service_charge": 0.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 2173.50,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.97,
+          "grand_total": 0.98
+        }
+      }
+    },
+    {
+      "bill_id": "bill_10_cafe_discounts",
+      "bill_name": "Blue Door Cafe (Discounts & Service Charge)",
+      "condition_tag": "Discounts & Charges",
+      "challenge_description": "Features a promotional 10% coupon discount alongside 5% optional service charge and net tax computation.",
+      "image_url": "/test_bills/bill_10_cafe_discounts.jpg",
+      "items": [
+        {"id": "b10_1", "name": "Avocado Toast", "quantity": 2, "unit_price": 280.0, "total_price": 560.0, "confidence": 0.93},
+        {"id": "b10_2", "name": "Caramel Macchiato", "quantity": 2, "unit_price": 220.0, "total_price": 440.0, "confidence": 0.95},
+        {"id": "b10_3", "name": "Cheesecake Slice", "quantity": 1, "unit_price": 260.0, "total_price": 260.0, "confidence": 0.92}
+      ],
+      "metadata": {
+        "restaurant_name": "BLUE DOOR CAFE",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 1260.0,
+        "taxes": {
+          "cgst": 29.93,
+          "sgst": 29.93,
+          "vat": 0.0,
+          "service_charge": 63.0,
+          "discount": 126.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 1256.86,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.95,
+          "discount": 0.91,
+          "service_charge": 0.92,
+          "grand_total": 0.96
+        }
+      }
+    },
+    {
+      "bill_id": "bill_11_brewery_vat",
+      "bill_name": "The Hop Yard Brewery (Dual VAT & GST)",
+      "condition_tag": "Dual VAT & Food GST",
+      "challenge_description": "Complex dual tax structure: separate state alcohol VAT and standard food GST.",
+      "image_url": "/test_bills/bill_11_brewery_vat.jpg",
+      "items": [
+        {"id": "b11_1", "name": "Craft Beer Pitcher", "quantity": 2, "unit_price": 600.0, "total_price": 1200.0, "confidence": 0.94},
+        {"id": "b11_2", "name": "Loaded Nachos", "quantity": 1, "unit_price": 380.0, "total_price": 380.0, "confidence": 0.91},
+        {"id": "b11_3", "name": "BBQ Chicken Wings", "quantity": 1, "unit_price": 420.0, "total_price": 420.0, "confidence": 0.93}
+      ],
+      "metadata": {
+        "restaurant_name": "THE HOP YARD BREWERY",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 2000.0,
+        "taxes": {
+          "cgst": 20.0,
+          "sgst": 20.0,
+          "vat": 120.0,
+          "service_charge": 140.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 2300.0,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.94,
+          "vat": 0.90,
+          "service_charge": 0.93,
+          "grand_total": 0.97
+        }
+      }
+    },
+    {
+      "bill_id": "bill_12_party_night",
+      "bill_name": "Celebration Lounge (Large Party Tab)",
+      "condition_tag": "High-Volume Tab",
+      "challenge_description": "Multi-guest gathering with 10% service charge and proportional distribution across beverage and food courses.",
+      "image_url": "/test_bills/bill_12_party_night.jpg",
+      "items": [
+        {"id": "b12_1", "name": "Mocktail Pitcher", "quantity": 4, "unit_price": 300.0, "total_price": 1200.0, "confidence": 0.95},
+        {"id": "b12_2", "name": "Veg Pizza Feast", "quantity": 3, "unit_price": 450.0, "total_price": 1350.0, "confidence": 0.94},
+        {"id": "b12_3", "name": "Pasta Alfredo", "quantity": 2, "unit_price": 380.0, "total_price": 760.0, "confidence": 0.92},
+        {"id": "b12_4", "name": "Brownie Sundae", "quantity": 2, "unit_price": 220.0, "total_price": 440.0, "confidence": 0.96}
+      ],
+      "metadata": {
+        "restaurant_name": "CELEBRATION CLUB LOUNGE",
+        "date": "12-OCT-2025 21:15",
+        "subtotal": 3750.0,
+        "taxes": {
+          "cgst": 93.75,
+          "sgst": 93.75,
+          "vat": 0.0,
+          "service_charge": 375.0,
+          "discount": 0.0,
+          "other_charges": 0.0
+        },
+        "grand_total": 4312.50,
+        "is_arithmetically_valid": true,
+        "discrepancy_amount": 0.0,
+        "field_confidences": {
+          "subtotal": 0.96,
+          "service_charge": 0.94,
+          "grand_total": 0.98
+        }
+      }
+    }
+  ]
+}
