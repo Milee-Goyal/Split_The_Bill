@@ -1,90 +1,94 @@
-# Split the Bill From a Photograph 🧾✨
+# Split the Bill From a Photograph
 
-> An AI-powered receipt OCR parser, human-in-the-loop review interface, interactive member chip assignment (Way A), and mathematically fair proportional tax & service charge calculation engine.
-
----
-
-## 🚀 Key Features
-
-1. **Photo in, Structured Bill Out (Upload & Live Camera)**:
-   - **Dual Ingestion**: Users can upload existing receipt images (drag-and-drop or browse) **OR click a live photo directly with their device camera/webcam** via an interactive camera modal.
-   - Parses restaurant receipts into a strict **Pydantic model** (`BillItem`, `BillTaxes`, `BillMetadata`, `ParsedBill`).
-   - Extracts item descriptions, quantities, unit prices, total prices, subtotals, CGST/SGST/VAT, service charges, discounts, and grand totals.
-   - Computes **per-field confidence scores** (0.0 to 1.0) based on OCR visual clarity.
-
-2. **Human-in-the-Loop Review Screen**:
-   - Displays receipt photo side-by-side with an editable data table.
-   - Highlights fields where confidence is low ($<85\%$) so humans can fix OCR errors before math executes.
-   - **Cashier Discrepancy Alert**: Automatically flags bills where the restaurant's printed total does not equal $\text{items} + \text{tax} - \text{discount}$.
-
-3. **Interactive Member Chips Assignment (Way A)**:
-   - Dynamic friend participant tags with colorful avatars.
-   - Interactive toggle chips on every food item: click member chips or `[Everyone]` to distribute.
-   - **Real-time Live Spend Ticker**: Shows live balances as chips are toggled.
-
-4. **Mathematically Fair Proportional Splitting**:
-   - Eliminates the unfair "equal tax split" bug. Taxes and service charges distribute **in strict proportion to each person's food spend fraction** ($S_i / S_{\text{total}}$).
-   - Exact penny/paise reconciliation ensures $\sum \text{Member Totals} \equiv \text{Bill Grand Total}$ without rounding loss.
-
-5. **12 Challenging Real-World Test Receipts**:
-   - Includes full dataset with synthetic/transformed receipts and hand-labeled ground truth in `test_bills/ground_truth.json`.
+A computer vision and deterministic arithmetic system that parses restaurant receipts, validates line-item confidence scores, supports interactive participant assignment via member chips, and computes mathematically fair proportional tax and service charge allocations.
 
 ---
 
-## 📊 Proportional Fair-Share Math Formula
+## Key Features
 
-### The Problem with Naive Splitting:
-Suppose two friends eat dinner:
-- **Rahul** eats ₹700 of food.
-- **Amit** only drinks a ₹100 juice.
-- Subtotal = ₹800. Restaurant GST (5%) + Service Fee (10%) = ₹120. Total = ₹920.
+1. **Structured Receipt Extraction (Upload and Live Camera)**:
+   - Ingestion via file upload (PNG/JPG) or real-time camera capture.
+   - Structured parsing into Pydantic v2 data models (`BillItem`, `BillTaxes`, `BillMetadata`, `ParsedBill`).
+   - Extracts line items, quantities, unit prices, total prices, subtotals, CGST/SGST/VAT, service charges, discounts, and grand totals.
+   - Computes per-field OCR confidence metrics (0.0 to 1.0).
 
-* **Naive (Unfair) Way**: Split ₹120 fees equally $\rightarrow$ ₹60 each. Amit pays ₹160 (60% tax rate on his ₹100 drink!).
-* **Our Proportional (Fair) Engine**:
-  $$\text{Spend Fraction } r_i = \frac{\text{Personal Food Subtotal } S_i}{\text{Total Food Subtotal } S_{\text{total}}}$$
-  $$\text{Fair Tax \& Fees Share } T_i = \text{Total Taxes} \times r_i$$
-  - Amit's fraction: $100 / 800 = 12.5\% \rightarrow \text{Tax \& Fee} = 120 \times 0.125 = ₹15.00$.
-  - Rahul's fraction: $700 / 800 = 87.5\% \rightarrow \text{Tax \& Fee} = 120 \times 0.875 = ₹105.00$.
-  - **Amit pays ₹115.00, Rahul pays ₹805.00.** Total matches ₹920.00 to the penny.
+2. **Human-in-the-Loop Verification**:
+   - Side-by-side review interface displaying original receipt image alongside an editable data table.
+   - Flags low-confidence extractions (confidence < 85%) for human review.
+   - **Cashier Discrepancy Detection**: Cross-checks expected totals against printed totals to detect vendor arithmetic errors:
+     $$|G_{\text{printed}} - G_{\text{expected}}| > 1.00$$
+
+3. **Interactive Participant Assignment (Way A - Chips)**:
+   - Dynamic participant pool (starts empty for manual user entry).
+   - Per-item interactive chips to allocate dishes to all members or subsets of participants.
+   - Real-time spend ticker recalculating individual balances upon chip toggles.
+
+4. **Proportional Expense Allocation**:
+   - Eliminates naive equal tax distribution. Taxes, discounts, and service charges are allocated strictly according to individual food consumption ratios:
+     $$r_i = \frac{S_i}{\sum S_j}, \quad T_i = T_{\text{total}} \cdot r_i$$
+   - Zero-residual penny reconciliation algorithm ensures:
+     $$\sum_{i=1}^{M} \text{Payable}_i \equiv G_{\text{printed}}$$
+
+5. **Benchmark Test Suite (12 Edge Cases)**:
+   - Dedicated evaluation view containing 12 challenging real-world receipt conditions with hand-annotated ground truths in `test_bills/ground_truth.json`.
 
 ---
 
-## 🔍 What is Mocked vs. What is Live?
+## Mathematical Formulation
 
-To make this repository **100% reproducible out-of-the-box without requiring paid API keys**:
-* **Live Vision AI (Optional)**: If you supply `GEMINI_API_KEY` or `OPENAI_API_KEY` in your environment, `/api/upload` will invoke `gemini-1.5-flash` or `gpt-4o` multimodal vision models.
-* **Offline Mock & Ground-Truth Test Suite (Default)**: Pre-loaded with 12 challenging edge-case receipts and hand-annotated ground truths in `test_bills/ground_truth.json`. Clicking any sample loads the authentic data with realistic OCR confidence scores and image previews instantly.
-* **Deterministic Logic (Always Live)**: The Pydantic validation, discrepancy detector, interactive chip assignment UI, and proportional math calculation engine are **100% real, active production code**.
+### The Problem with Naive Equal Allocation:
+Consider two diners:
+- Person A consumes 700.00 in food.
+- Person B consumes 100.00 in beverages.
+- Food Subtotal = 800.00. Taxes and Service Charge (15%) = 120.00. Grand Total = 920.00.
+
+* **Naive Split**: Taxes divided equally (120 / 2 = 60.00 each). Person B pays 160.00 (an effective 60% tax rate on a 100.00 beverage).
+* **Proportional Engine**:
+  $$S_i = \sum_{k \in \text{Items}_i} \frac{P_k}{N_k}$$
+  $$r_i = \frac{S_i}{S_{\text{total}}}$$
+  $$T_i = T_{\text{total}} \cdot r_i$$
+  - Person B: $r_B = 100 / 800 = 0.125 \implies \text{Tax} = 120 \times 0.125 = 15.00 \implies \text{Total} = 115.00$
+  - Person A: $r_A = 700 / 800 = 0.875 \implies \text{Tax} = 120 \times 0.875 = 105.00 \implies \text{Total} = 805.00$
+  - Sum of shares equals 920.00 exactly.
 
 ---
 
-## 📁 12 Test Cases (Challenging Conditions)
+## Mocked vs. Live Components
 
-All 12 test conditions from the problem brief are implemented in `test_bills/`:
+To ensure complete, deterministic reproducibility without requiring external paid API keys:
+- **Vision AI Pipeline**: If `GEMINI_API_KEY` or `OPENAI_API_KEY` is provided in the environment, `/api/upload` queries the respective multimodal vision model (`gemini-1.5-flash` or `gpt-4o`).
+- **Offline Benchmark Mode (Default)**: Pre-configured with 12 challenging edge-case receipts and hand-annotated ground truths in `test_bills/ground_truth.json`. Selecting any benchmark card loads authentic image previews, extracted line items, and realistic confidence scores.
+- **Deterministic Core**: Schema validation, arithmetic verification, member chip assignment, and proportional calculation engines run live production code in all modes.
 
-| # | Test Bill File | Real-World Hard Condition |
+---
+
+## Benchmark Dataset (12 Challenging Edge Cases)
+
+Located in `test_bills/`:
+
+| Number | Receipt File | Target Condition |
 |---|---|---|
-| 1 | `bill_01_dim_light.jpg` | Low lighting ambiance with warm restaurant shadow noise |
-| 2 | `bill_02_crumpled.jpg` | Folded, crumpled paper with crease line artifacts |
-| 3 | `bill_03_steep_angle.jpg` | 40-degree perspective tilt & trapezoid keystone distortion |
-| 4 | `bill_04_faded_thermal.jpg` | Faded thermal print with low contrast dot-matrix letters |
-| 5 | `bill_05_handwritten.jpg` | Pen & paper cursive handwriting from traditional dhaba |
-| 6 | `bill_06_two_scripts.jpg` | Bilingual Devanagari (Hindi) + English script line items |
-| 7 | `bill_07_long_bill_p1 & p2` | Multi-panel tall banquet invoice stitched across pages |
-| 8 | `bill_08_wrong_printed_total.jpg` | **Genuinely faulty printed total** (cashier arithmetic mismatch) |
-| 9 | `bill_09_family_feast.jpg` | Multi-person feast with shared gravies and bread units |
-| 10 | `bill_10_cafe_discounts.jpg` | Promotional 10% coupon deduction + service fee |
-| 11 | `bill_11_brewery_vat.jpg` | Dual tax structure: State alcohol VAT (10%) + Food GST (5%) |
-| 12 | `bill_12_party_night.jpg` | Large table tab with 10% service charge and mixed courses |
+| 1 | `bill_01_dim_light.jpg` | Low-light ambiance with warm shadow noise |
+| 2 | `bill_02_crumpled.jpg` | Folded, crumpled paper with crease artifacts |
+| 3 | `bill_03_steep_angle.jpg` | 40-degree perspective tilt and trapezoidal keystone distortion |
+| 4 | `bill_04_faded_thermal.jpg` | Faded thermal substrate with low dot-matrix contrast |
+| 5 | `bill_05_handwritten.jpg` | Manual pen-and-paper cursive handwriting |
+| 6 | `bill_06_two_scripts.jpg` | Bilingual Devanagari (Hindi) and English line items |
+| 7 | `bill_07_long_bill_p1 & p2` | Multi-panel banquet invoice across sequential captures |
+| 8 | `bill_08_wrong_printed_total.jpg` | Faulty printed receipt total (+42.50 cashier arithmetic discrepancy) |
+| 9 | `bill_09_family_feast.jpg` | Multi-person feast with shared dishes |
+| 10 | `bill_10_cafe_discounts.jpg` | Promotional coupon deduction combined with service fee |
+| 11 | `bill_11_brewery_vat.jpg` | Dual tax structure: State alcohol VAT (10%) and Food GST (5%) |
+| 12 | `bill_12_party_night.jpg` | Large gathering tab with 10% service charge |
 
 ---
 
-## 🛠️ Quickstart Installation & Running
+## Installation and Execution
 
-### 1. Clone & Enter Directory
+### 1. Clone Repository
 ```bash
-git clone <your-repo-url>
-cd "Split the Bill From a Photograph"
+git clone https://github.com/Milee-Goyal/Split_The_Bill.git
+cd Split_The_Bill
 ```
 
 ### 2. Install Dependencies
@@ -92,34 +96,37 @@ cd "Split the Bill From a Photograph"
 python -m pip install -r requirements.txt
 ```
 
-### 3. Start the Application
+### 3. Launch Server
+Using Python:
 ```bash
 python -m uvicorn app.main:app --reload --port 8000
 ```
-Open your browser and navigate to: **`http://localhost:8000`**
+Or on Windows, double-click `run_app.bat`.
+
+Open: `http://localhost:8000`
 
 ---
 
-## 🧪 Running Automated Tests
+## Automated Test Suite
 
-Run the full automated test suite (Pydantic schema validation, proportional tax logic, penny reconciliation, and API endpoints):
+Execute the test suite (Pydantic schema validation, proportional allocation, rounding reconciliation, and API integration):
 
 ```bash
-python -m pytest
+python -m pytest -v
 ```
 
 Output:
 ```
-============================== 10 passed in 0.47s ==============================
+tests/test_api.py::test_list_sample_bills_endpoint PASSED
+tests/test_api.py::test_get_bill_detail_endpoint PASSED
+tests/test_api.py::test_calculate_endpoint_api PASSED
+tests/test_calculator.py::test_proportional_tax_split_not_equal PASSED
+tests/test_calculator.py::test_shared_all_items PASSED
+tests/test_calculator.py::test_discrepancy_detection_on_wrong_total PASSED
+tests/test_ground_truth.py::test_ground_truth_contains_at_least_12_bills PASSED
+tests/test_ground_truth.py::test_ground_truth_pydantic_validation PASSED
+tests/test_ground_truth.py::test_bill_08_identifies_wrong_printed_total PASSED
+tests/test_ground_truth.py::test_dim_light_and_faded_thermal_have_lower_confidences PASSED
+
+============================== 10 passed in 0.38s ==============================
 ```
-
----
-
-## 📹 90-Second Demo Video Guide (For Placement Submission)
-
-When recording your demo video to post on Google Drive:
-1. **0:00 - 0:15 (Upload & Gallery)**: Show the landing page in **Light Mode**. Point out the 12 pre-loaded challenging receipt edge cases. Click on `bill_08_wrong_printed_total` or `bill_01_dim_light`.
-2. **0:15 - 0:35 (Review Screen)**: Show the side-by-side view. Highlight the receipt photo on the left, the editable table on the right, the **OCR Confidence badges** (Green/Amber), and point out the **Discrepancy Banner** detecting the cashier's math mistake!
-3. **0:35 - 0:55 (Interactive Member Chips)**: Click *Continue to Member Chips*. Show members (`Rahul`, `Priya`, `Amit`). Click member chips on dishes (e.g. Biryani $\rightarrow$ Rahul & Priya; Coke $\rightarrow$ Amit). Show the **Live Spend Ticker** updating in real time.
-4. **0:55 - 1:20 (Fair-Share Breakdown)**: Click *Calculate Proportional Split*. Show the member cards, the exact proportional tax formula, and the *"Exact Penny Match"* badge.
-5. **1:20 - 1:30 (WhatsApp Export)**: Click *"Copy Summary for WhatsApp / UPI"* and show the formatted text.
